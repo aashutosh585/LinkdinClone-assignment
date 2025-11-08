@@ -9,8 +9,8 @@ A modern, full-stack social media web application inspired by LinkedIn and Twitt
 
 ## 🌟 Live Demo
 
-- **Frontend**: [Live Website](https://your-netlify-url.netlify.app) *(Deploy to update)*
-- **Backend API**: [API Endpoint](https://your-railway-url.railway.app) *(Deploy to update)*
+- **Frontend**: [https://linkdin-clone-assignment.vercel.app](https://linkdin-clone-assignment.vercel.app)
+- **Backend API**: [https://linkdinclone-assignment.onrender.com](https://linkdinclone-assignment.onrender.com)
 
 ## 📋 Project Overview
 
@@ -262,15 +262,11 @@ This project was built as an internship assignment. Feel free to fork and enhanc
 3. Make your changes
 4. Submit a pull request
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 👨‍💻 Developer
+## ‍💻 Developer
 
 **Ashutosh Maurya**
 - GitHub: [@aashutosh585](https://github.com/aashutosh585)
-- Email: your.email@example.com
+- Email: ashutoshmaurya585@gmail.com
 
 ## 🏢 Assignment Details
 
@@ -278,43 +274,6 @@ This project is open source and available under the [MIT License](LICENSE).
 **Position**: Full Stack Developer Internship  
 **Assignment**: LinkedIn Clone - Simple Social Media Website  
 **Contact**: hr@appdost.in  
-
----
-
-### 📋 Assignment Checklist
-
-✅ **Core Requirements**
-- [x] User registration with email and password
-- [x] User login functionality
-- [x] User profile display in header
-- [x] Create posts with text content
-- [x] Display user name, post text, and timestamp
-- [x] View all posts from all users
-- [x] Latest posts shown first
-- [x] User logout functionality
-
-✅ **Bonus Features**
-- [x] Like and comment buttons on posts
-- [x] Edit and delete own posts
-- [x] User profile pages
-- [x] Modern responsive design
-- [x] Dark/light mode toggle
-- [x] Share post functionality
-- [x] Real-time feed updates
-
-✅ **Technical Requirements**
-- [x] Frontend: React.js ✓
-- [x] Backend: Node.js + Express.js ✓
-- [x] Database: MongoDB ✓
-- [x] Clean UI and responsive design ✓
-- [x] Working authentication system ✓
-- [x] Post creation and viewing ✓
-
-✅ **Deployment Requirements**
-- [ ] Live frontend deployment (Netlify/Vercel)
-- [ ] Live backend deployment (Railway/Render)
-- [x] GitHub repository with complete code
-- [x] Comprehensive README file
 
 ---
 
