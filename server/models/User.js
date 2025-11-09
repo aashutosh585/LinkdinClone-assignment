@@ -38,7 +38,11 @@ const userSchema = new mongoose.Schema({
     website: {
         type: String,
         default: ''
-    }
+    },
+    bookmarks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post'
+    }]
 }, {
     timestamps: true
 });

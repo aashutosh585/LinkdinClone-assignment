@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { postsAPI } from '../../services/api';
 import { 
@@ -29,7 +30,9 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
   const [commentLoading, setCommentLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(
+    user?.bookmarks?.includes(post.id || post._id) || false
+  );
   const [commentsCount, setCommentsCount] = useState(post.comments?.length || 0);
   
   const menuRef = useRef(null);
@@ -153,9 +156,18 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
     setShowShareMenu(false);
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    toast.success(isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks');
+  const handleBookmark = async () => {
+    try {
+      setLoading(true);
+      const response = await postsAPI.toggleBookmark(post.id || post._id);
+      setIsBookmarked(response.isBookmarked);
+      toast.success(response.message || (response.isBookmarked ? 'Added to bookmarks' : 'Removed from bookmarks'));
+    } catch (error) {
+      console.error('Bookmark error:', error);
+      toast.error('Failed to update bookmark');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -163,17 +175,22 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
       <div className="flex px-4 py-3 space-x-3">
         {/* Avatar */}
         <div className="shrink-0">
-          {post.author?.profilePicture ? (
-            <img
-              src={post.author.profilePicture}
-              alt={post.author.name}
-              className="w-10 h-10 rounded-full object-cover hover:opacity-90 transition-opacity"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <User className="w-5 h-5 text-white" />
-            </div>
-          )}
+          <Link 
+            to={`/profile/${post.author?._id || post.author?.id}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {post.author?.profilePicture ? (
+              <img
+                src={post.author.profilePicture}
+                alt={post.author.name}
+                className="w-10 h-10 rounded-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity">
+                <User className="w-5 h-5 text-white" />
+              </div>
+            )}
+          </Link>
         </div>
 
         {/* Content */}
@@ -181,9 +198,13 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center space-x-2">
-              <h3 className="font-bold text-gray-900 hover:underline cursor-pointer text-sm">
+              <Link 
+                to={`/profile/${post.author?._id || post.author?.id}`}
+                className="font-bold text-gray-900 hover:underline cursor-pointer text-sm"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {post.author?.name || 'Unknown User'}
-              </h3>
+              </Link>
               <span className="text-gray-500 text-sm">@{post.author?.email?.split('@')[0] || 'unknown'}</span>
               <span className="text-gray-500 text-sm">·</span>
               <span className="text-gray-500 text-sm hover:underline cursor-pointer">
@@ -243,11 +264,15 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
             
             {/* Post Image */}
             {post.image && (
-              <div className="mt-3 rounded-2xl overflow-hidden border border-gray-200">
+              <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
                 <img
                   src={post.image}
                   alt="Post content"
-                  className="w-full max-h-96 object-cover hover:opacity-95 transition-opacity"
+                  className="w-full max-h-96 object-cover hover:opacity-95 transition-opacity cursor-pointer"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                  loading="lazy"
                 />
               </div>
             )}
@@ -333,17 +358,22 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
               {/* Add Comment Form */}
               <form onSubmit={handleComment} className="flex space-x-3 mb-4">
                 <div className="shrink-0">
-                  {user?.profilePicture ? (
-                    <img
-                      src={user.profilePicture}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
-                  )}
+                  <Link 
+                    to="/profile"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {user?.profilePicture ? (
+                      <img
+                        src={user.profilePicture}
+                        alt={user.name}
+                        className="w-8 h-8 rounded-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </Link>
                 </div>
                 <div className="flex-1">
                   <textarea
@@ -374,24 +404,33 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
                 {comments.map((comment, index) => (
                   <div key={comment._id || index} className="flex space-x-3">
                     <div className="shrink-0">
-                      {comment.user?.profilePicture ? (
-                        <img
-                          src={comment.user.profilePicture}
-                          alt={comment.user.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center">
-                          <User className="w-4 h-4 text-white" />
-                        </div>
-                      )}
+                      <Link 
+                        to={`/profile/${comment.user?._id || comment.user?.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {comment.user?.profilePicture ? (
+                          <img
+                            src={comment.user.profilePicture}
+                            alt={comment.user.name}
+                            className="w-8 h-8 rounded-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity">
+                            <User className="w-4 h-4 text-white" />
+                          </div>
+                        )}
+                      </Link>
                     </div>
                     <div className="flex-1">
                       <div className="bg-gray-50 rounded-2xl px-3 py-2">
                         <div className="flex items-center space-x-1 mb-1">
-                          <span className="font-semibold text-sm text-gray-900">
+                          <Link 
+                            to={`/profile/${comment.user?._id || comment.user?.id}`}
+                            className="font-semibold text-sm text-gray-900 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {comment.user?.name || 'Anonymous'}
-                          </span>
+                          </Link>
                           <span className="text-xs text-gray-500">
                             {formatTimeAgo(comment.createdAt)}
                           </span>
@@ -406,6 +445,8 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
           )}
         </div>
       </div>
+      {/* Clear bottom spacing */}
+      <div className="h-1 bg-transparent"></div>
     </article>
   );
 };

@@ -32,6 +32,17 @@ html, body {
   background-color: #ffffff;
 }
 
+/* Image optimizations */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix image loading issues */
+img[src=""] {
+  display: none;
+}
+
 /* Twitter-like hover effects */
 .hover-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease;

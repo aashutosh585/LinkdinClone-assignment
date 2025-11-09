@@ -83,16 +83,6 @@ export const postsAPI = {
     return response.data;
   },
 
-  getPost: async (postId) => {
-    const response = await api.get(`/posts/${postId}`);
-    return response.data;
-  },
-
-  updatePost: async (postId, postData) => {
-    const response = await api.put(`/posts/${postId}`, postData);
-    return response.data;
-  },
-
   deletePost: async (postId) => {
     const response = await api.delete(`/posts/${postId}`);
     return response.data;
@@ -118,13 +108,13 @@ export const postsAPI = {
     return response.data;
   },
 
-  getLikedPosts: async (page = 1, limit = 10) => {
-    const response = await api.get(`/posts/liked?page=${page}&limit=${limit}`);
+  toggleBookmark: async (postId) => {
+    const response = await api.post(`/posts/${postId}/bookmark`);
     return response.data;
   },
 
-  searchPosts: async (query, page = 1, limit = 10) => {
-    const response = await api.get(`/posts/search?query=${query}&page=${page}&limit=${limit}`);
+  getBookmarkedPosts: async (page = 1, limit = 10) => {
+    const response = await api.get(`/posts/bookmarks?page=${page}&limit=${limit}`);
     return response.data;
   },
 };

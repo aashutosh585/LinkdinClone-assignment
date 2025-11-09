@@ -114,7 +114,7 @@ const CreatePost = ({ onPostCreated }) => {
                 
                 {/* Image Preview */}
                 {image && (
-                  <div className="mt-3 rounded-lg overflow-hidden border border-gray-200">
+                  <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
                     <img
                       src={image}
                       alt="Preview"
@@ -123,6 +123,7 @@ const CreatePost = ({ onPostCreated }) => {
                         toast.error('Invalid image URL');
                         setImage('');
                       }}
+                      loading="lazy"
                     />
                   </div>
                 )}

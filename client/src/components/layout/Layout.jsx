@@ -11,7 +11,6 @@ import {
   Settings, 
   LogOut,
   MoreHorizontal,
-  Hash,
   Users,
   Sparkles
 } from 'lucide-react';
@@ -37,11 +36,6 @@ const Layout = ({ children }) => {
       name: 'Home', 
       path: '/feed', 
       icon: Home
-    },
-    { 
-      name: 'Explore', 
-      path: '/explore', 
-      icon: Hash
     },
     { 
       name: 'Notifications', 

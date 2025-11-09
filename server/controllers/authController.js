@@ -8,9 +8,6 @@ const generateToken = (userId) => {
     });
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/signup
-// @access  Public
 export const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -93,9 +90,6 @@ export const signup = async (req, res) => {
     }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -153,9 +147,6 @@ export const login = async (req, res) => {
     }
 };
 
-// @desc    Get current user profile
-// @route   GET /api/auth/me
-// @access  Private
 export const getMe = async (req, res) => {
     try {
         res.json({
@@ -168,6 +159,7 @@ export const getMe = async (req, res) => {
                 bio: req.user.bio,
                 location: req.user.location,
                 website: req.user.website,
+                bookmarks: req.user.bookmarks || [],
                 createdAt: req.user.createdAt,
                 updatedAt: req.user.updatedAt
             }
@@ -181,9 +173,6 @@ export const getMe = async (req, res) => {
     }
 };
 
-// @desc    Update user profile
-// @route   PUT /api/auth/profile
-// @access  Private
 export const updateProfile = async (req, res) => {
     try {
         const { name, bio, location, website, profilePicture } = req.body;
@@ -240,9 +229,6 @@ export const updateProfile = async (req, res) => {
     }
 };
 
-// @desc    Get user profile by ID
-// @route   GET /api/auth/user/:id
-// @access  Public
 export const getUserProfile = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -276,9 +262,6 @@ export const getUserProfile = async (req, res) => {
     }
 };
 
-// @desc    Search users
-// @route   GET /api/auth/search
-// @access  Public
 export const searchUsers = async (req, res) => {
     try {
         const { query, page = 1, limit = 10 } = req.query;

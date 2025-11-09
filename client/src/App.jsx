@@ -10,6 +10,7 @@ import Signup from './components/auth/Signup';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
 import Network from './pages/Network';
+import Bookmarks from './pages/Bookmarks';
 
 // Component to handle redirects based on auth status
 const AuthRedirect = () => {
@@ -76,10 +77,26 @@ const App = () => {
               } 
             />
             <Route 
+              path="/profile/:userId" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/network" 
               element={
                 <ProtectedRoute>
                   <Network />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/bookmarks" 
+              element={
+                <ProtectedRoute>
+                  <Bookmarks />
                 </ProtectedRoute>
               } 
             />

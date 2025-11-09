@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { postsAPI } from '../services/api';
+import { postsAPI, authAPI } from '../services/api';
 import PostCard from '../components/posts/PostCard';
 import Layout from '../components/layout/Layout';
 import { 
@@ -15,9 +16,11 @@ import {
 import toast from 'react-hot-toast';
 
 const Profile = () => {
+  const { userId } = useParams();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [profileUser, setProfileUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -28,25 +31,87 @@ const Profile = () => {
   });
   
   const { user, updateProfile } = useAuth();
+  
+  // Determine if viewing own profile or someone else's
+  const isOwnProfile = (!userId) || 
+                      (userId === user?.id) || 
+                      (userId === user?._id) || 
+                      (profileUser === null && user);
+  const displayUser = (isOwnProfile || !profileUser) ? user : profileUser;
 
   useEffect(() => {
-    if (user) {
-      setEditForm({
-        name: user.name || '',
-        bio: user.bio || '',
-        location: user.location || '',
-        website: user.website || '',
-        profilePicture: user.profilePicture || ''
-      });
-      setLoading(false);
-      fetchUserPosts();
-    }
-  }, [user]);
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        
+        console.log('Profile Debug:', {
+          userId,
+          userIdFromAuth: user?.id,
+          userIdFromAuth_id: user?._id,
+          userName: user?.name
+        });
+        
+        // Always fetch profile data if there's a userId
+        if (userId) {
+          // Check if it's own profile by comparing IDs
+          const isViewingOwnProfile = userId === user?.id || userId === user?._id;
+          
+          console.log('Is viewing own profile?', isViewingOwnProfile);
+          
+          if (isViewingOwnProfile) {
+            // It's own profile, use current user data
+            if (user) {
+              setEditForm({
+                name: user.name || '',
+                bio: user.bio || '',
+                location: user.location || '',
+                website: user.website || '',
+                profilePicture: user.profilePicture || ''
+              });
+              setProfileUser(null); // Clear profileUser to use current user
+              setLoading(false);
+              fetchUserPosts(user.id || user._id);
+            }
+          } else {
+            // Viewing someone else's profile
+            console.log('Fetching profile for userId:', userId);
+            const response = await authAPI.getUserProfile(userId);
+            console.log('Profile response:', response);
+            setProfileUser(response.user);
+            setLoading(false);
+            fetchUserPosts(userId);
+          }
+        } else {
+          // No userId in URL, definitely own profile
+          if (user) {
+            setEditForm({
+              name: user.name || '',
+              bio: user.bio || '',
+              location: user.location || '',
+              website: user.website || '',
+              profilePicture: user.profilePicture || ''
+            });
+            setProfileUser(null);
+            setLoading(false);
+            fetchUserPosts(user.id || user._id);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        toast.error('Failed to load profile');
+        setLoading(false);
+      }
+    };
 
-  const fetchUserPosts = async () => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [userId, user]);
+
+  const fetchUserPosts = async (targetUserId) => {
     try {
       setPostsLoading(true);
-      const response = await postsAPI.getUserPosts(user.id);
+      const response = await postsAPI.getUserPosts(targetUserId);
       setPosts(response.posts);
     } catch (error) {
       toast.error('Failed to fetch posts');
@@ -105,10 +170,10 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row sm:items-end">
                 {/* Profile Picture */}
                 <div className="relative -mt-16 mb-4 sm:mb-0 sm:mr-6">
-                  {user.profilePicture ? (
+                  {displayUser?.profilePicture ? (
                     <img
-                      src={user.profilePicture}
-                      alt={user.name}
+                      src={displayUser.profilePicture}
+                      alt={displayUser.name}
                       className="w-32 h-32 rounded-full border-4 border-white object-cover bg-white"
                     />
                   ) : (
@@ -120,23 +185,23 @@ const Profile = () => {
 
                 {/* Basic Info */}
                 <div className="sm:mb-4">
-                  <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                  {user.bio && (
-                    <p className="text-gray-600 mt-1">{user.bio}</p>
+                  <h1 className="text-2xl font-bold text-gray-900">{displayUser?.name}</h1>
+                  {displayUser?.bio && (
+                    <p className="text-gray-600 mt-1">{displayUser.bio}</p>
                   )}
                   
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-2 space-y-1 sm:space-y-0 text-sm text-gray-500">
-                    {user.location && (
+                    {displayUser?.location && (
                       <div className="flex items-center">
                         <MapPin className="w-4 h-4 mr-1" />
-                        {user.location}
+                        {displayUser.location}
                       </div>
                     )}
-                    {user.website && (
+                    {displayUser?.website && (
                       <div className="flex items-center">
                         <Globe className="w-4 h-4 mr-1" />
                         <a
-                          href={user.website}
+                          href={displayUser.website}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
@@ -147,22 +212,24 @@ const Profile = () => {
                     )}
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
-                      Joined {formatDate(user.createdAt)}
+                      Joined {formatDate(displayUser?.createdAt)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Edit Button */}
-              <div className="mt-4 sm:mt-0">
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </button>
-              </div>
+              {/* Edit Button - Only show for own profile */}
+              {isOwnProfile && (
+                <div className="mt-4 sm:mt-0">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

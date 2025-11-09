@@ -125,14 +125,16 @@ const Feed = () => {
               </div>
             </div>
           ) : (
-            posts.map((post) => (
-              <PostCard
-                key={post.id || post._id}
-                post={post}
-                onPostUpdate={handlePostUpdate}
-                onPostDelete={handlePostDelete}
-              />
-            ))
+            <div className="space-y-6">
+              {posts.map((post) => (
+                <PostCard
+                  key={post.id || post._id}
+                  post={post}
+                  onPostUpdate={handlePostUpdate}
+                  onPostDelete={handlePostDelete}
+                />
+              ))}
+            </div>
           )}
 
           {/* Load More Button */}
